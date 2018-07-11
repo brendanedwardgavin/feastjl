@@ -1,13 +1,10 @@
 srand(843)
 
-include("feast.jl")
-
-include("NLEutil.jl")
+include("util.jl")
 include("feast_core.jl")
 include("feast_nonlinear.jl")
 
 using IterativeSolvers
-using Pardiso
 
 #eigenvalue problem dimension:
 n=500
@@ -54,30 +51,19 @@ println("Using quadratic feast")
 
 #Using Beyn
 println("Using Beyn")
-TinvApp(z,V)=\((M*z^2+D*z+K),V)
-#(lest,xest)=beyn(TinvApp,x0,nc,emid,ra,rb)
-ncmax=100
 Tf(z)=(z^2*M+z*D+K)
-#(lest,xest)=beynLoop(Tf,x0,ncmax,emid,ra,rb,eps)
-#(lest,xest)=ibeynIt(Tf,x0,100,eps,4,emid,ra,rb)
+(lest,xest)=beyn(Tf,x0,nc,emid,ra,rb)
+ncmax=100
 res=M*xest*diagm(lest.^2)+D*xest*diagm(lest)+K*xest
 maxres=getMaxResInside(lest,xest,res,emid,ra,rb)
 println("res=$maxres")
-println(lest)
-
 
 #Using general nonlinear feast, i.e. feast with beyn
 println("Using general nlfeast")
 Tf(z)=(z^2*M+z*D+K)
-#(lest, xest)=nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit)
+(lest, xest)=nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit)
 #(lest, xest)=inlfeast_beyn(Tf,x0,0.01,50,nc,emid,ra,rb,eps,maxit)
 
-#Print final residual and eigenvalues:
-#res=M*xest*diagm(lest.^2)+D*xest*diagm(lest)+K*xest
-#maxres=getMaxResInside(lest,xest,res,emid,ra,rb)
-
-#println("res=$maxres")
-#println(lest)
 
 
 

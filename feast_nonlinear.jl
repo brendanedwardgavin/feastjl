@@ -3,10 +3,6 @@
 function nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit;log=false)
     #Tf is single value nonlinear residual T(z)
 
-    #pardiso for sparse systems
-    #ps=MKLPardisoSolver()
-    #set_matrixtype!(ps,Pardiso.COMPLEX_NONSYM)
-
     #integrand = (I-T^-1(z)T(l))x(zI-l)^-1
     function integrand(z,x,lest,data,resvecs)
             (n,m0)=size(x)

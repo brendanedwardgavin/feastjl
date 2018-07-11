@@ -2,7 +2,7 @@ srand(843)
 
 #include("feast.jl")
 #importall feastLinear
-include("NLEutil.jl")
+include("util.jl")
 include("feast_core.jl")
 include("feast_linear.jl")
 using IterativeSolvers
@@ -40,14 +40,14 @@ eps=1e-5 #residual convergence tolerance
 maxit=100 #maximum FEAST iterations
 x0=rand(n,m0) #eigenvector initial guess
 
-#=println("Standard FEAST")
+println("Standard FEAST")
 (lf,xf)=feast_linear(A,B,x0,nc,emid,ra,rb,eps,maxit)
 p=sortperm(real(lf))
-println(lf[p])=#
+println(lf[p])
 
 println("Iterative FEAST BiCGSTAB")
-alpha=0.01
-isMaxit=220
+alpha=0.01 #relative accuracy of linear system solves
+isMaxit=220  #maximum number of linear system iterations per FEAST iteration
 (lf,xf,data)=ifeast_linear(A,B,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=true)
 p=sortperm(real(lf))
 println(lf[p])

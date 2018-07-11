@@ -1,7 +1,7 @@
 srand(843)
 
 #include("feast.jl")
-include("NLEutil.jl")
+include("util.jl")
 include("feast_core.jl")
 include("feast_linear.jl")
 
@@ -9,7 +9,7 @@ using IterativeSolvers
 
 n=1000
 
-alpha=1.0
+alpha=0.99 # #determine how nonsymmetric our matrix is; alpha=1.0 makes a symmetric matrix
 #generate B-matrix eigenvectors and eigenvalues
 #vectors:
 R=rand(n,n)
@@ -39,17 +39,19 @@ B=Xb*diagm(Lb)*Yb'
 emid=1.0+0.0*im #contour center
 ra=0.5 #contour radius 1
 rb=0.5 #contour radius 2
-nc=4 #number of contour points
+nc=8 #number of contour points
 m0=2 #subspace dimension
 eps=1e-9 #residual convergence tolerance
 maxit=100 #maximum FEAST iterations
 x0=rand(n,m0) #eigenvector initial guess
 y0=copy(x0)
 
-alphals=1e-16
-isMaxit=30
+alphals=1e-16 #linear system solve accuracy
+isMaxit=30 #maximum number of linear system iterations
 #(ye,le,xe)=nseig(A,B)
-#(ye,le,xe,data)=feastNS_linear(A,B,x0,y0,nc,emid,ra,rb,eps,maxit; log=true)
+println("Standard FEAST:")
+(ye,le,xe,data)=feastNS_linear(A,B,x0,y0,nc,emid,ra,rb,eps,maxit; log=true)
+println("Iterative FEAST:")
 (ye,le,xe)=ifeastNS_linear(A,B,x0,y0,alphals,isMaxit,nc,emid,ra,rb,eps,maxit)
 
 p=sortperm(real(le))
