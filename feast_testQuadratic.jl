@@ -62,7 +62,12 @@ println("res=$maxres")
 println("Using general nlfeast")
 Tf(z)=(z^2*M+z*D+K)
 (lest, xest)=nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit)
-#(lest, xest)=inlfeast_beyn(Tf,x0,0.01,50,nc,emid,ra,rb,eps,maxit)
+
+#using iterative general nonlinear FEAST with GMRES
+println("Using general iterative nlfeast")
+alpha=0.0 #target accuracy for linear system solutions
+maxitls = 50 # maximum linear system iterations
+(lest, xest)=inlfeast_beyn(Tf,x0,alpha,maxitls,nc,emid,ra,rb,eps,maxit)
 
 
 

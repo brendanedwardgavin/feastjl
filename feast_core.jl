@@ -18,7 +18,16 @@ function getLog(m0,nc,maxit)
     return data
 end
 
-#core FEAST algorithm for any symmetrix eigenvalue problem
+
+########################
+# CORE FEAST FUNCTIONS #
+########################
+
+#These functions are one- and two-sided implementations of the FEAST algorithm. They are essentially outlines that encompass all possible variations of the FEAST algorithm.
+
+#They are used by passing functions to them to perform the essential operations of the FEAST algorithm, such as evaluating the eigenvector residual and calculating the contour integrand.
+
+#core one-sided FEAST algorithm; this function is used for all variations of FEAST
 function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; log=false, insideEps=1e-2, verbose=1, set_nin=false)
     #Tf: eigenvector residual function. E.g. for linear problems Tf(l,x) = B*x*diagm(l)-A*x
     #integrand: function that returns integral integrand evaluated at point z in complex plane, applied to a vector x. E.g. for linear FEAST integrand(z,x,l)=\(z*B-A,x)
@@ -29,6 +38,10 @@ function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; lo
     # ra,rb: radii of integration ellipse
     # eps: convergence tolerance
     # maxit: maximum number of FEAST iterations
+    # insideEps: residual threshold for determining whether or not an eigenvalue inside the contour is spurious
+    # log: if true, returns dictionary object with logged convergence information
+    # verbose(0-1): how much information to print out
+    # set_nin: if equal to an integer, sets the number of eigenvalues inside the contour to 'set_nin'; used for diagnostic purposes
 
     #get shapes of arrays:
 	(n,m0)=size(x0)
@@ -153,18 +166,22 @@ function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; lo
 end
 
 
-#core FEAST algorithm for any nonsymmetric eigenvalue problem
+#core two-sided FEAST algorithm 
 #Difference from symmetric FEAST: have to solve for left and right eigenvectors simultaneously and biorthogonalize them
 function feastNS_core(Tf,hTf,integrand,hintegrand,rrsolvens,biortho,x0,y0,nc,emid,ra,rb,eps,maxit; insideEps=1e-2, log=false)
     #Tf: eigenvector residual function. E.g. for linear problems Tf(l,x) = B*x*diagm(l)-A*x
+    #hTf: hermitian conjugate transpose of residual function
     #integrand: function that returns integral integrand evaluated at point z in complex plane, applied to a vector x. E.g. for linear FEAST integrand(z,x,l)=\(z*B-A,x)
-    #rrsolve: function for returning eigenvalue and eigenvector approximations from rayleigh ritz. E.g. for linear FEAST rrsolve(Q)=eig(Q'*A*Q,Q'*B*Q)
-    #x0: initial guess for eigenvectors
+    #rrsolvens: function for returning eigenvalue and eigenvector approximations from rayleigh ritz. E.g. for linear FEAST rrsolve(Q)=eig(Q'*A*Q,Q'*B*Q)
+    #x0: initial guess for right eigenvectors
+    #y0: initial guess for left eigenvectors 
     #nc: number of quadrature points for numerical integration
     #emid: center of integration ellipse
     # ra,rb: radii of integration ellipse
     # eps: convergence tolerance
     # maxit: maximum number of FEAST iterations
+    # insideEps: residual threshold for determining whether or not an eigenvalue inside the contour is spurious
+    # log: if true, returns dictionary object with logged convergence information
 
     #get shapes of arrays:
 	(n,m0)=size(x0)

@@ -1,4 +1,4 @@
-include("iterativeSolvers.jl")
+include("mybicgstab.jl")
 
 #one-sided FEAST for linear eigenvalue problems
 function feast_linear(A,B,x0,nc,emid,ra,rb,eps,maxit;log=false, insideEps=1e-2, set_nin=false)
@@ -52,7 +52,7 @@ function feastNS_linear(A,B,x0,y0,nc,emid,ra,rb,eps,maxit; log=false,insideEps=1
 end
 
 
-#generalized inexact FEAST algorithm with minres
+#generalized inexact FEAST algorithm with gmres
 function ifeast_linear(A,B,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=false,insideEps=1e-2, verbose=1)
     (n,m0)=size(x0)
     
@@ -66,13 +66,11 @@ function ifeast_linear(A,B,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=false,in
         maxits=0
         rhs=convert(Array{Complex128,2},resvecs)
         
-        
-        
         for i in 1:m0
             #(int[:,i],history)=bicgstabl(M,resvecs[:,i],1,max_mv_products=isMaxit,tol=alpha,initial_zero=true,log=true)
             #(int[:,i],history)=idrs(M,rhs[:,i];maxiter=isMaxit,tol=alpha,log=true)
-            #(int[:,i],history)=gmres(M,resvecs[:,i],restart=isMaxit,tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
-            (int[:,i],history)=minres(M,resvecs[:,i],tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
+            (int[:,i],history)=gmres(M,resvecs[:,i],restart=isMaxit,tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
+            #(int[:,i],history)=minres(M,resvecs[:,i],tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
             nlinits=size(history[:resnorm],1)
             data[:linIts][i,nc,data[:iterations]]=nlinits
             #data[:linResiduals][i,nc,data[:iterations]]=history[:resnorm][nlinits]
@@ -118,9 +116,6 @@ function ifeast_linearBicgstab(A,B,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=
         
         for i in 1:m0
             (int[:,i],history)=bicgstabl(M,resvecs[:,i],1,max_mv_products=isMaxit,tol=alpha,initial_zero=true,log=true)
-            #(int[:,i],history)=idrs(M,rhs[:,i];maxiter=isMaxit,tol=alpha,log=true)
-            #(int[:,i],history)=gmres(M,resvecs[:,i],restart=isMaxit,tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
-            #(int[:,i],history)=minres(M,resvecs[:,i],tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
             nlinits=size(history[:resnorm],1)
             data[:linIts][i,nc,data[:iterations]]=nlinits
             data[:linResiduals][i,nc,data[:iterations]]=history[:resnorm][nlinits]

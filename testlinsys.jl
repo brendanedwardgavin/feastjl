@@ -1,6 +1,6 @@
 srand(843)
 using IterativeSolvers
-include("iterativeSolvers.jl")
+include("mybicgstab.jl")
 
 n=1000
 

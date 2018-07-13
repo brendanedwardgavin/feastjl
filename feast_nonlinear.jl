@@ -9,12 +9,7 @@ function nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit;log=false)
             TinvTxl=zeros(Complex128,n,m0)
             Tfz=Tf(z)
             
-            if(typeof(Tfz)==SparseMatrixCSC{Complex{Float64},Int64} || typeof(Tfz)==SparseMatrixCSC{Float64,Int64} ) #use pardiso for sparse matrix
-                #TinvTxl=solve(ps,Tfz,R)
-                TinvTxl=\(Tfz,resvecs)
-            else
-                TinvTxl=\(Tfz,resvecs)
-            end
+            TinvTxl=\(Tfz,resvecs)
             
             gamma=spdiagm(1./(z.-lest))
             Qk=x*gamma-TinvTxl*gamma
@@ -47,6 +42,65 @@ function nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit;log=false)
     return feast_core(blockTf,integrand,rrsolve,x0,nc,emid,ra,rb,eps,maxit;log=log)
 end
 
+
+
+#iterative FEAST for general nonlinear eigenvalue problems, using Beyn's algorithm for Rayleigh Ritz.
+function inlfeast_beyn(Tf,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=false)
+    #Tf is single value nonlinear residual T(z)
+
+    #integrand = (I-T^-1(z)T(l))x(zI-l)^-1
+    function integrand(z,x,lest,data,resvecs)
+            (n,m0)=size(x)
+            TinvTxl=zeros(Complex128,n,m0)
+            Tfz=Tf(z)
+            
+            maxits=0
+            
+            #TinvTxl=\(Tfz,resvecs)
+            int=zeros(Complex128,n,m0)
+            for i in 1:m0
+                #(int[:,i],history)=bicgstabl(M,resvecs[:,i],1,max_mv_products=isMaxit,tol=alpha,initial_zero=true,log=true)
+                #(int[:,i],history)=idrs(M,rhs[:,i];maxiter=isMaxit,tol=alpha,log=true)
+                (int[:,i],history)=gmres(Tfz,resvecs[:,i],restart=isMaxit,tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
+                #(int[:,i],history)=minres(M,resvecs[:,i],tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
+                nlinits=size(history[:resnorm],1)
+                data[:linIts][i,nc,data[:iterations]]=nlinits
+                #data[:linResiduals][i,nc,data[:iterations]]=history[:resnorm][nlinits]
+                data[:linResiduals][i,nc,data[:iterations]]=norm(resvecs[:,i]-M*int[:,i])/norm(resvecs[:,i])
+                
+                if(nlinits>maxits)
+                    maxits=nlinits
+                end
+            end
+            
+            return (x-int)*spdiagm(1./(z.-lest))
+    end
+    
+    
+    #solve projected problem Q'*T(z)Q=0 using Beyn's algorithm
+    function rrsolve(Q)
+        (n,m0)=size(Q)
+        
+        v0=rand(Complex128,m0,m0)
+        Tfr(z)=Q'*Tf(z)*Q
+
+        (lest,xq)=beyn(Tfr,v0,5*nc,emid,ra,rb)
+        
+        return (lest,Q*xq)
+    end
+    
+    #Block method for applying residual
+    function blockTf(l,x)
+        (n,m0)=size(x)
+        out=zeros(x)
+        for i in 1:m0
+            out[:,i]=Tf(l[i])*x[:,i]
+        end
+        return out
+    end
+
+    return feast_core(blockTf,integrand,rrsolve,x0,nc,emid,ra,rb,eps,maxit;log=log)
+end
 
 
 

@@ -1,6 +1,6 @@
 module feastUtil
     export linquad,trapezoidal,getMaxResInside,Quadrrsolve,beyn,nseig
-    include("NLEutil.jl")
+    include("util.jl")
 end
 
 module feastCore
