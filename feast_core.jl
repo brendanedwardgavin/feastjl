@@ -152,9 +152,12 @@ function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; lo
         end  
 
         #Orthonormalize FEAST subspace to avoid spurious eigenpairs:
-        (Qq,Rq)=qr(Q)
-        Q[:]=Qq
+        #0.63
+        #(Qq,Rq)=qr(Q)
+        #Q[:]=Qq
 
+        #0.7
+        Q=Array(qr(Q).Q)
 	end
 
     if(log)
