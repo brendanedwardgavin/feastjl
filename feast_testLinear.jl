@@ -1,10 +1,10 @@
-srand(843)
+using LinearAlgebra
+using Random
 
-#include("feast.jl")
-#importall feastLinear
-include("util.jl")
-include("feast_core.jl")
-include("feast_linear.jl")
+Random.seed!(843)
+
+include("feast.jl")
+using ..feastLinear
 using IterativeSolvers
 
 n=100

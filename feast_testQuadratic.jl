@@ -35,7 +35,7 @@ K=B1*B2
 
 #FEAST parameters
 m0=5 #subspace dimension
-x0=rand(Complex128,n,m0) #eigenvector initial guess
+x0=rand(ComplexF64,n,m0) #eigenvector initial guess
 nc=4 #number of integration quadrature points
 emid=50 #center point of contour
 ra=1.5 #contour radius 1
@@ -68,7 +68,3 @@ println("Using general iterative nlfeast")
 alpha=0.0 #target accuracy for linear system solutions
 maxitls = 50 # maximum linear system iterations
 (lest, xest)=inlfeast_beyn(Tf,x0,alpha,maxitls,nc,emid,ra,rb,eps,maxit)
-
-
-
-

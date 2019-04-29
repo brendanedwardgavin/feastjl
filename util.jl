@@ -4,7 +4,7 @@ function estConvRate(residuals)
     A=zeros(n,2)
     A[:,1]=ones(n)
     A[:,2]=collect(0:n-1)
-    
+
     #solve least squares Ax=residuals
     x=\(A,log.(residuals)/log(10))
     return x[2]
@@ -26,16 +26,16 @@ end
 
 #get left and right eigenvectors of generalized, nonsymmetric eigenvalue problem
 function nseig(A,B)
-    if(typeof(A)!=Array{Complex64,2}) 
-        A=convert(Array{Complex64,2},A)
+    if(typeof(A)!=Array{ComplexF64,2}) 
+        A=convert(Array{ComplexF64,2},A)
     end
-    
-    if(typeof(B)!=Array{Complex64,2}) 
-        B=convert(Array{Complex64,2},B)
+
+    if(typeof(B)!=Array{ComplexF64,2})
+        B=convert(Array{ComplexF64,2},B)
     end
-    
+
     alpha,beta,vl,vr=Base.LinAlg.LAPACK.ggev!('V','V',A,B)
-    
+
     return vl,alpha./beta,vr
 end
 
@@ -62,14 +62,14 @@ function getRealSpurious(lest,resnorms,emid,ra,rb; inEps=1e-2)
 	lestdif=abs.(real(lest.-emid)/abs.(ra)+im*imag(lest.-emid)/abs.(rb))
 	m0=size(lest,1)
 	ninside=0
-    
+
     p=sortperm(resnorms)
-	
+
 	s=Array{Int64,1}() #indices of eigenvalues inside contour
 	spurious=Array{Int64,1}() #indices of spurious eigenvalues inside contour
 	other=Array{Int64,1}() #stuff outside contour
-	
-	
+
+
 	for k in 1:m0
 	    if(lestdif[k]<=1.0 && resnorms[k]<inEps)
 	        ninside=ninside+1
@@ -80,7 +80,7 @@ function getRealSpurious(lest,resnorms,emid,ra,rb; inEps=1e-2)
 	        push!(other,k)
 	    end
 	end
-    
+
     return s,spurious,other
 end
 
@@ -92,17 +92,17 @@ function getMaxResInside(lest,x,res,emid,ra,rb;inEps=1e-2, getIndices=false, get
 	lestdif=abs.(real(lest.-emid)/abs.(ra)+im*imag(lest.-emid)/abs.(rb))
 	(n,m0)=size(x)
 	ninside=0
-	
+
 	resnorms=zeros(m0)
     for i in 1:m0
         resnorms[i]=norm(res[:,i])/norm(x[:,i])
     end
-    
+
     p=sortperm(resnorms)
-	
+
 	s=Array{Int64,1}() #indices of eigenvalues inside contour
 	spurious=Array{Int64,1}() #indices of spurious eigenvalues inside contour
-	
+
 	for k in 1:m0
 	    if(lestdif[k]<=1.0 && resnorms[k]<inEps)
 	        ninside=ninside+1
@@ -112,8 +112,8 @@ function getMaxResInside(lest,x,res,emid,ra,rb;inEps=1e-2, getIndices=false, get
 	        push!(spurious,k)
 	    end
 	end
-	
-	
+
+
     maxres=0.0
 	if (set_nin!=false)
 	    maxres=resnorms[set_nin]
@@ -124,16 +124,16 @@ function getMaxResInside(lest,x,res,emid,ra,rb;inEps=1e-2, getIndices=false, get
             for k in 1:m0
                 if(lestdif[k]<=1.0 && resnorms[k]<inEps) #using 1.0 as the radius because we rescaled everything when forming lestdif
                    tmp=resnorms[k]#norm(res[:,k])/norm(x[:,k])
-                   if(tmp>maxres) 
+                   if(tmp>maxres)
                         maxres=tmp
                    end
                 end
-            end     
+            end
         end
     end
-    
+
     #println("50th residual=$(resnorms[p[50]])")
-    
+
     if(getIndices & !(getSpurious))
         return maxres,ninside,s
     elseif (getIndices & (getSpurious))
@@ -148,7 +148,7 @@ function getInsideIndex(lest,emid,ra,rb)
 
     s=Array{Int64,1}()
     m0=size(lest,1)
-    
+
     lestdif=abs.(real(lest.-emid)/abs.(ra)+im*imag(lest.-emid)/abs.(rb))
 
     for k in 1:m0
@@ -156,7 +156,7 @@ function getInsideIndex(lest,emid,ra,rb)
            push!(s,k)
         end
     end
-    
+
     return s
 end
 
@@ -178,7 +178,7 @@ function getLock(lest,x,res,emid,ra,rb,eps)
     for i in 1:m0
         resnorms[i]=norm(res[:,i])/norm(x[:,i])
     end
-    
+
     p=sortperm(resnorms)
 
     locked=Array{Int64,1}()
@@ -188,10 +188,10 @@ function getLock(lest,x,res,emid,ra,rb,eps)
         if(lestdif[k]<=1.0 && resnorms[k]<=eps) #using 1.0 as the radius because we rescaled everything when forming lestdif
             push!(locked,k)
         end
-    end     
-    
+    end
+
     #println("50th residual=$(resnorms[p[50]])")
-    
+
     return locked
 end
 
@@ -202,7 +202,7 @@ function getNotLock(lest,x,res,emid,ra,rb,eps)
     for i in 1:m0
         resnorms[i]=norm(res[:,i])/norm(x[:,i])
     end
-    
+
     notlocked=Array{Int64,1}()
 
     maxres=0.0
@@ -210,10 +210,10 @@ function getNotLock(lest,x,res,emid,ra,rb,eps)
         if(resnorms[k]>eps) #using 1.0 as the radius because we rescaled everything when forming lestdif
             push!(notlocked,k)
         end
-    end     
-    
+    end
+
     #println("50th residual=$(resnorms[p[50]])")
-    
+
     return notlocked
 end
 
@@ -252,13 +252,13 @@ end
 #Tapp=T(z)
 function beynLoop(Tf,V,ncmax,emid,ra,rb,eps)
     (n,m0)=size(V)
-    
-    l=zeros(Complex128,m0)
-    x=zeros(Complex128,n,m0)
-    
+
+    l=zeros(ComplexF64,m0)
+    x=zeros(ComplexF64,n,m0)
+
     for nc in 1:ncmax
         (l,x)=beyn(Tf,V,nc,emid,ra,rb)
-        R=zeros(Complex128,n,m0)
+        R=zeros(ComplexF64,n,m0)
         for i in 1:m0
             R[:,i]=Tf(l[i])*x[:,i]
         end
@@ -268,16 +268,16 @@ function beynLoop(Tf,V,ncmax,emid,ra,rb,eps)
             return (l,x)
         end
     end
-    
+
     return (l,x)
 end
 
-function beyn(Tf,V::Array{Complex128,2},nc,emid,ra,rb; verbose=false)
+function beyn(Tf,V::Array{ComplexF64,2},nc,emid,ra,rb; verbose=false)
     (n,m0)=size(V)
-    
+
     (gk,wk)=trapezoidal(nc) #contour integral quadrature rule
     offset=pi/nc #offset angle of first quadrature point; makes sure it isn't on real axis for hermitian problems
-    
+
     A0=zeros(V)
     A1=zeros(V)
     for k in 1:nc
@@ -288,40 +288,40 @@ function beyn(Tf,V::Array{Complex128,2},nc,emid,ra,rb; verbose=false)
 	    theta=gk[k]*pi+pi+offset
 	    z=emid+((ra+rb)/2)*exp(im*theta)+((ra-rb)/2)*exp(-1.0*im*theta)
 
-        Qk=zeros(Complex128,n,m0)
+        Qk=zeros(ComplexF64,n,m0)
         Tfz=Tf(z)
 
         tic()
         if(typeof(Tfz)==SparseMatrixCSC{Complex{Float64},Int64})
             Qk=\(Tfz,V)
-        else    
+        else
             Qk=\(Tfz,V)
         end
         dt=toq()
         if(verbose)
             println("   dt=$dt s")
         end
-  
+
 	    A0=A0+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*Qk
 	    A1=A1+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*z*Qk
     end
-    
+
     (v0,s0,w0) = svd(A0)
-    
-    Av=v0'*A1*w0*diagm(1./s0)
-  
+
+    Av=v0'*A1*w0*diagm(1 ./ s0)
+
     (l,xv)=eig(Av)
-    
+
     return (l,v0*xv)
 end
 
 
-function ibeyn(Tf,V::Array{Complex128,2},alpha,isMaxit,nc,emid,ra,rb; verbose=false)
+function ibeyn(Tf,V::Array{ComplexF64,2},alpha,isMaxit,nc,emid,ra,rb; verbose=false)
     (n,m0)=size(V)
-    
+
     (gk,wk)=trapezoidal(nc) #contour integral quadrature rule
     offset=pi/nc #offset angle of first quadrature point; makes sure it isn't on real axis for hermitian problems
-    
+
     A0=zeros(V)
     A1=zeros(V)
     for k in 1:nc
@@ -331,13 +331,13 @@ function ibeyn(Tf,V::Array{Complex128,2},alpha,isMaxit,nc,emid,ra,rb; verbose=fa
 	    theta=gk[k]*pi+pi+offset
 	    z=emid+((ra+rb)/2)*exp(im*theta)+((ra-rb)/2)*exp(-1.0*im*theta)
 
-        Qk=zeros(Complex128,n,m0)
+        Qk=zeros(ComplexF64,n,m0)
         Tfz=Tf(z)
 
         tic()
         #if(typeof(Tfz)==SparseMatrixCSC{Complex{Float64},Int64})
         #    Qk=\(Tfz,V)
-        #else    
+        #else
         #    Qk=\(Tfz,V)
         #end
 
@@ -346,37 +346,37 @@ function ibeyn(Tf,V::Array{Complex128,2},alpha,isMaxit,nc,emid,ra,rb; verbose=fa
             #Qk[:,i]=gmres(Tfz,V[:,i],restart=isMaxit,tol=alpha,initially_zero=true,maxiter=isMaxit,log=false)
             Qk[:,i]=minres(Tfz,V[:,i],tol=alpha,initially_zero=true,maxiter=isMaxit,log=false)
         end
-        
+
         dt=toq()
-        
-        
+
+
         if(verbose)
             println("   dt=$dt s")
         end
-  
+
 	    A0=A0+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*Qk
 	    A1=A1+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*z*Qk
     end
-    
+
     (v0,s0,w0) = svd(A0)
-    
-    Av=v0'*A1*w0*diagm(1./s0)
-  
+
+    Av=v0'*A1*w0*diagm(1 ./ s0)
+
     (l,xv)=eig(Av)
-    
+
     return (l,v0*xv)
 end
 
 
 
 function beynscan(emin,emax,ndiv,Tf,nc,n,m0; verbose=false)
-    
-    eigs=Array{Complex128,1}()
-    resvals=Array{Complex128,1}()
-    
+
+    eigs=Array{ComplexF64,1}()
+    resvals=Array{ComplexF64,1}()
+
     edges=linspace(emin,emax,ndiv+1)
-    x0=rand(Complex128,n,m0)
-    
+    x0=rand(ComplexF64,n,m0)
+
     for i in 1:ndiv
         if(verbose)
             println("Div $i of $ndiv")
@@ -384,9 +384,9 @@ function beynscan(emin,emax,ndiv,Tf,nc,n,m0; verbose=false)
         emid=(edges[i]+edges[i+1])/2.0
         ra=(edges[i]-edges[i+1])/2.0
         rb=ra
-        
+
         (lest,xest)=beyn(Tf,x0,nc,emid,ra,rb)
-        
+
         res=zeros(x0)
         for j in 1:m0
             res[:,j]=Tf(lest[j])*xest[:,j]
@@ -402,7 +402,7 @@ function beynscan(emin,emax,ndiv,Tf,nc,n,m0; verbose=false)
             end
         end
     end
-    
+
     return eigs,resvals
 end
 
@@ -413,12 +413,12 @@ function trapezoidalCont(nc)
     offset=pi/nc
     a=offset
     b=2*pi+offset
-    
+
     dx=(b-a)/nc
-    
+
     weights=zeros(nc)
     points=zeros(nc)
-    
+
     weights[1]=dx
     points[1]=a
     for i in 2:nc
@@ -428,6 +428,3 @@ function trapezoidalCont(nc)
 
     return (points,weights)
 end
-
-
-
