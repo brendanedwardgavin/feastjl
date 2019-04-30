@@ -14,6 +14,7 @@ module feastCore
 end
 
 module feastLinear
+    using SparseArrays
     using LinearAlgebra
     using Random
     using ..feastCore,..feastUtil,IterativeSolvers
@@ -22,6 +23,7 @@ module feastLinear
 end
 
 module feastNonlinear
+    using SparseArrays
     using LinearAlgebra
     using Random
     using ..feastCore,..feastUtil

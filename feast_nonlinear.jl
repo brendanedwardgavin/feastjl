@@ -11,7 +11,7 @@ function nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit;log=false)
 
             TinvTxl=\(Tfz,resvecs)
 
-            gamma=spdiagm(1 ./(z.-lest))
+            gamma=spdiagm(0 => 1 ./(z.-lest))
             Qk=x*gamma-TinvTxl*gamma
             return Qk
     end
@@ -73,7 +73,7 @@ function inlfeast_beyn(Tf,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=false)
                 end
             end
 
-            return (x-int)*spdiagm(1 ./(z.-lest))
+            return (x-int)*spdiagm(0 => 1 ./(z.-lest))
     end
 
 

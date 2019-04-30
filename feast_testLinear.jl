@@ -14,7 +14,7 @@ n=100
 R=rand(n,n)
 (Xb,R)=qr(R)
 #values:
-Lb=rand(n)*0.5+0.5 #random positive numbers
+Lb=rand(n)*0.5 .+ 0.5 #random positive numbers
 
 #generate A-matrix eigenvectors:
 R=rand(n,n)
@@ -27,8 +27,8 @@ for i in 1:n
 end
 
 #generate eigenvalue problem matrices
-A=Xb*diagm(sqrt.(Lb))*X1*diagm(L1)*X1'*diagm(sqrt.(Lb))*Xb'
-B=Xb*diagm(Lb)*Xb'
+A=Xb*diagm(0 => sqrt.(Lb))*X1*diagm(0 => L1)*X1'*diagm(0 => sqrt.(Lb))*Xb'
+B=Xb*diagm(0 => Lb)*Xb'
 
 #FEAST parameters
 emid=1.0+0.0*im #contour center

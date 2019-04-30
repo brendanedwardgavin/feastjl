@@ -56,7 +56,7 @@ function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; lo
     x=copy(x0)
 
     #initialize eigenvalue estimates:
-	lest=zeros(Complex64,m0,1)
+	lest=zeros(ComplexF64,m0,1)
 
 	#initialize iteration number:
 	it=0
@@ -85,12 +85,7 @@ function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; lo
         data[:iterations]=it
 
         #rayleigh ritz
-        tic()
         (lest,x)=rrsolve(Q)
-        dt=toq()
-
-        verbose>1 && println("   ritz  $dt s")
-
 
         #sort everything by real part of eigenvalue
         p=sortperm(real(lest))
@@ -127,7 +122,7 @@ function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; lo
 
 
         #apply contour integral to get FEAST subspace:
-	    Q=zeros(x)
+	    Q=zero(x)
 	    for k in 1:nc
 	    #Q=@parallel (+) for k in 1:nc
 	        #integration curve is an ellipse centered at emid, with radii ra and rb
@@ -141,10 +136,8 @@ function feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps::Float64,maxit; lo
             #integrand evaluated at quadrature point z
 
             #println("     linear system $k")
-            tic()
+
             Qk=integrand(z,x,lest,data,resvecs)
-            dt=toq()
-            verbose>1 && println("     linear system $k  $dt s")
 
             #add integrand contribution to quadrature:
 	        Q=Q+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*Qk
@@ -197,7 +190,7 @@ function feastNS_core(Tf,hTf,integrand,hintegrand,rrsolvens,biortho,x0,y0,nc,emi
     y=copy(y0)
 
     #initialize eigenvalue estimates:
-	lest=zeros(Complex64,m0,1)
+	lest=zeros(ComplexF64,m0,1)
 
 	#initialize iteration number:
 	it=0

@@ -10,11 +10,11 @@ function feast_linear(A,B,x0,nc,emid,ra,rb,eps,maxit;log=false, insideEps=1e-2, 
         Aq=Q'*A*Q
         Bq=Q'*B*Q
 
-        (le,xe)=eig(Aq,Bq)
+        le,xe=eigen(Aq,Bq)
         return (le,Q*xe)
     end
 
-    Tf(l,x)=(B*x*diagm(l)-A*x)
+    Tf(l,x)=(B*x*diagm( 0 => l)-A*x)
 
     return feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps,maxit;log=log,insideEps=insideEps, set_nin=set_nin)
 
@@ -35,15 +35,15 @@ function feastNS_linear(A,B,x0,y0,nc,emid,ra,rb,eps,maxit; log=false,insideEps=1
         return (R*ye,le,Q*xe)
     end
 
-    Tf(l,x)=(B*x*spdiagm(l)-A*x)
-    hTf(l,y)=B'*y*spdiagm(l)'-A'*y
+    Tf(l,x)=(B*x*spdiagm(0 => l)-A*x)
+    hTf(l,y)=B'*y*spdiagm(0 => l)'-A'*y
 
     #use SVD to B-biorthogonalize subspaces
     function biortho(Q,R)
         Bq=R'*B*Q
         (u,s,v)=svd(Bq)
-        Y=R*u*diagm(1 ./sqrt.(s))
-        X=Q*v*diagm(1 ./sqrt.(s))
+        Y=R*u*diagm( 0 => 1 ./sqrt.(s))
+        X=Q*v*diagm( 0 => 1 ./sqrt.(s))
         return (X,Y)
     end
 
@@ -83,17 +83,17 @@ function ifeast_linear(A,B,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=false,in
         #int=\(M,resvecs)
         #println("      linits=$maxits")
         #int=zbicgstabBlock(M,resvecs,zeros(n,m0),isMaxit,alpha)
-        return (x-int)*spdiagm(1 ./(z.-lest))
+        return (x-int)*spdiagm(0 => 1 ./(z.-lest))
     end
 
     function rrsolve(Q)
         Aq=Q'*A*Q
         Bq=Q'*B*Q
-        (le,xe)=eig(Aq,Bq)
+        le,xe=eigen(Aq,Bq)
         return (le,Q*xe)
     end
 
-    Tf(l,x)=(B*x*spdiagm(l)-A*x)
+    Tf(l,x)=(B*x*spdiagm(0 => l)-A*x)
 
     return feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps,maxit;log=log,insideEps=insideEps, verbose=verbose)
 
@@ -122,17 +122,17 @@ function ifeast_linearBicgstab(A,B,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=
         end
 
 
-        return (x-int)*spdiagm(1 ./(z.-lest))
+        return (x-int)*spdiagm(0 => 1 ./(z.-lest))
     end
 
     function rrsolve(Q)
         Aq=Q'*A*Q
         Bq=Q'*B*Q
-        (le,xe)=eig(Aq,Bq)
+        le,xe=eigen(Aq,Bq)
         return (le,Q*xe)
     end
 
-    Tf(l,x)=(B*x*spdiagm(l)-A*x)
+    Tf(l,x)=(B*x*spdiagm(0 => l)-A*x)
 
     return feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps,maxit;log=log,insideEps=insideEps,verbose=verbose)
 
@@ -147,7 +147,7 @@ function ifeastNS_linear(A,B,x0,y0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit; log=fa
     #hintegrand(z,y,lest,hdata,hresvecs)=\((z*B-A)',B'*y)
     function integrand(z,x,lest,data,resvecs)
         M=z*B-A
-        rhs=B*x*spdiagm(lest)-A*x
+        rhs=B*x*spdiagm(0 => lest)-A*x
         int0=zeros(ComplexF64,n,m0)
         int=zeros(ComplexF64,n,m0)
         int=zbicgstabBlock(M,resvecs,int0,isMaxit,alpha)
@@ -157,12 +157,12 @@ function ifeastNS_linear(A,B,x0,y0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit; log=fa
         end
 
         #int=\(M,resvecs)
-        return (x-int)*spdiagm(1 ./(z.-(lest)))
+        return (x-int)*spdiagm(0 => 1 ./(z.-(lest)))
     end
 
     function hintegrand(z,y,lest,hdata,hresvecs)
         M=(z*B-A)'
-        rhs=B'*y*spdiagm(lest)'-A'*y
+        rhs=B'*y*spdiagm(0 => lest)'-A'*y
         int0=zeros(ComplexF64,n,m0)
         int=zeros(ComplexF64,n,m0)
         int=zbicgstabBlock(M,hresvecs,int0,isMaxit,alpha)
@@ -172,7 +172,7 @@ function ifeastNS_linear(A,B,x0,y0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit; log=fa
             #(int[:,i],history)=bicgstabl(M,rhs[:,i],2,max_mv_products=isMaxit,tol=alpha,initial_zero=true,log=true)
         end
         #int=\(M,hresvecs)
-        return (y-int)*spdiagm(1 ./(z'.-conj.(lest)))
+        return (y-int)*spdiagm(0 => 1 ./(z'.-conj.(lest)))
     end
 
     function rrsolvens(Q,R)
@@ -182,15 +182,15 @@ function ifeastNS_linear(A,B,x0,y0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit; log=fa
         return (R*ye,le,Q*xe)
     end
 
-    Tf(l,x)=(B*x*spdiagm(l)-A*x)
-    hTf(l,y)=B'*y*spdiagm(l)'-A'*y
+    Tf(l,x)=(B*x*spdiagm(0 => l)-A*x)
+    hTf(l,y)=B'*y*spdiagm(0 => l)'-A'*y
 
     #use SVD to B-biorthogonalize subspaces
     function biortho(Q,R)
         Bq=R'*B*Q
         (u,s,v)=svd(Bq)
-        Y=R*u*diagm(1 ./sqrt.(s))
-        X=Q*v*diagm(1 ./sqrt.(s))
+        Y=R*u*diagm( 0 => 1 ./sqrt.(s))
+        X=Q*v*diagm( 0 => 1 ./sqrt.(s))
         return (X,Y)
     end
 

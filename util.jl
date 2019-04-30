@@ -26,7 +26,7 @@ end
 
 #get left and right eigenvectors of generalized, nonsymmetric eigenvalue problem
 function nseig(A,B)
-    if(typeof(A)!=Array{ComplexF64,2}) 
+    if(typeof(A)!=Array{ComplexF64,2})
         A=convert(Array{ComplexF64,2},A)
     end
 
@@ -228,7 +228,7 @@ function Quadrrsolve(Q,M,D,K,emid,ra,rb)
 
         #solve projected problem
         (Aq,Bq) = linquad(Mq,Dq,Kq)
-        (lest,xest)=eig(full(Aq),full(Bq))
+        lest,xest=eigen(full(Aq),full(Bq))
 
         #get eigenvectors from linearization
         xall=Q*(xest[m0+1:2*m0,:])
@@ -291,15 +291,10 @@ function beyn(Tf,V::Array{ComplexF64,2},nc,emid,ra,rb; verbose=false)
         Qk=zeros(ComplexF64,n,m0)
         Tfz=Tf(z)
 
-        tic()
         if(typeof(Tfz)==SparseMatrixCSC{Complex{Float64},Int64})
             Qk=\(Tfz,V)
         else
             Qk=\(Tfz,V)
-        end
-        dt=toq()
-        if(verbose)
-            println("   dt=$dt s")
         end
 
 	    A0=A0+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*Qk
@@ -310,7 +305,7 @@ function beyn(Tf,V::Array{ComplexF64,2},nc,emid,ra,rb; verbose=false)
 
     Av=v0'*A1*w0*diagm(1 ./ s0)
 
-    (l,xv)=eig(Av)
+    l,xv=eigen(Av)
 
     return (l,v0*xv)
 end
@@ -334,7 +329,6 @@ function ibeyn(Tf,V::Array{ComplexF64,2},alpha,isMaxit,nc,emid,ra,rb; verbose=fa
         Qk=zeros(ComplexF64,n,m0)
         Tfz=Tf(z)
 
-        tic()
         #if(typeof(Tfz)==SparseMatrixCSC{Complex{Float64},Int64})
         #    Qk=\(Tfz,V)
         #else
@@ -347,13 +341,6 @@ function ibeyn(Tf,V::Array{ComplexF64,2},alpha,isMaxit,nc,emid,ra,rb; verbose=fa
             Qk[:,i]=minres(Tfz,V[:,i],tol=alpha,initially_zero=true,maxiter=isMaxit,log=false)
         end
 
-        dt=toq()
-
-
-        if(verbose)
-            println("   dt=$dt s")
-        end
-
 	    A0=A0+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*Qk
 	    A1=A1+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*z*Qk
     end
@@ -362,7 +349,7 @@ function ibeyn(Tf,V::Array{ComplexF64,2},alpha,isMaxit,nc,emid,ra,rb; verbose=fa
 
     Av=v0'*A1*w0*diagm(1 ./ s0)
 
-    (l,xv)=eig(Av)
+    (l,xv)=eigen(Av)
 
     return (l,v0*xv)
 end

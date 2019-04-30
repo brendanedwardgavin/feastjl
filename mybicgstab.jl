@@ -1,4 +1,5 @@
-import Base.diag
+using LinearAlgebra
+using SparseArrays
 
 function diag(a::Number)
 	return a
@@ -54,7 +55,7 @@ function zbicgstabBlock(A,b,x0,maxit,eps)
 
 		#omega=1/phi
 		omega=1 ./phi
-		w=r-As*spdiagm(omega)
+		w=r-As*spdiagm( 0 =>  omega)
 		#w=r-diagmmult(As,omega)
 
 		#matrix multiply:
@@ -65,7 +66,7 @@ function zbicgstabBlock(A,b,x0,maxit,eps)
         chi=bdot(Aw,w) ./bdot(Aw,Aw)
 
 		#r=w-chi*Aw
-		r=w-Aw*spdiagm(chi)
+		r=w-Aw*spdiagm( 0 =>  chi)
         #r=w-diagmmult(Aw,chi)
 
 		rs=sqrt.(bdot(r,r))
@@ -78,7 +79,7 @@ function zbicgstabBlock(A,b,x0,maxit,eps)
 		end
 
 		#x=x+s*omega+w*chi
-		x=x+s*spdiagm(omega)+w*spdiagm(chi)
+		x=x+s*spdiagm( 0 =>  omega)+w*spdiagm( 0 =>  chi)
 		#x=x+diagmmult(s,omega)+diagmmult(w,chi)
 
 		deltaold=delta
@@ -87,7 +88,7 @@ function zbicgstabBlock(A,b,x0,maxit,eps)
 		delta=bdot(y0,r)#diag(y0'*r)
 		#psi=-1.0*omega*delta/(deltaold*chi)
 		psi=-1.0*omega.*delta ./(deltaold.*chi)
-		s=r-(s-(As)*spdiagm(chi))*spdiagm(psi)
+		s=r-(s-(As)*spdiagm( 0 =>  chi))*spdiagm( 0 =>  psi)
 		#s=r-(s-diagmmult(As,chi.*psi))
 		#print("     $(norm(s))\n")
 		ss=sqrt.(bdot(s,s))
