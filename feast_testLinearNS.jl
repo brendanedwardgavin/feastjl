@@ -1,13 +1,12 @@
-srand(843)
+using Random
+using LinearAlgebra
+Random.seed!(843)
 
-#include("feast.jl")
-include("util.jl")
-include("feast_core.jl")
-include("feast_linear.jl")
-
+include("feast.jl")
+using ..feastLinear
 using IterativeSolvers
 
-n=1000
+n=100
 
 alpha=0.99 # #determine how nonsymmetric our matrix is; alpha=1.0 makes a symmetric matrix
 #generate B-matrix eigenvectors and eigenvalues
@@ -17,7 +16,7 @@ R=rand(n,n)
 Xb=Xb+(1-alpha)*ones(n,n)
 Yb=inv(Xb)'
 #values:
-Lb=rand(n)*0.5+0.5 #random positive numbers
+Lb=rand(n)*0.5 .+ 0.5 #random positive numbers
 
 #generate A-matrix eigenvectors:
 R=rand(n,n)
@@ -32,8 +31,8 @@ for i in 1:n
 end
 
 #generate eigenvalue problem matrices
-A=Xb*diagm(sqrt.(Lb))*X*diagm(L1)*Y'*diagm(sqrt.(Lb))*Yb'
-B=Xb*diagm(Lb)*Yb'
+A=Xb*diagm(0 => sqrt.(Lb))*X*diagm(0 => L1)*Y'*diagm(0 => sqrt.(Lb))*Yb'
+B=Xb*diagm(0 => Lb)*Yb'
 
 #FEAST parameters
 emid=1.0+0.0*im #contour center

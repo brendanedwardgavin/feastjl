@@ -34,7 +34,7 @@ function nseig(A,B)
         B=convert(Array{ComplexF64,2},B)
     end
 
-    alpha,beta,vl,vr=Base.LinAlg.LAPACK.ggev!('V','V',A,B)
+    alpha,beta,vl,vr=LinearAlgebra.LAPACK.ggev!('V','V',A,B)
 
     return vl,alpha./beta,vr
 end

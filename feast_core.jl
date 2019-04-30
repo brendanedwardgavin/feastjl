@@ -257,8 +257,8 @@ function feastNS_core(Tf,hTf,integrand,hintegrand,rrsolvens,biortho,x0,y0,nc,emi
         end
 
         #apply contour integral to get FEAST subspace:
-	    Q=zeros(x)
-	    R=zeros(y)
+	    Q=zero(x)
+	    R=zero(y)
 	    for k in 1:nc
 	        #integration curve is an ellipse centered at emid, with radii ra and rb
 
