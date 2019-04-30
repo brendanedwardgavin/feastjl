@@ -26,7 +26,8 @@ module feastNonlinear
     using SparseArrays
     using LinearAlgebra
     using Random
+    using IterativeSolvers
     using ..feastCore,..feastUtil
-    export nlfeast_quad,nlfeast_beyn
+    export nlfeast_quad,nlfeast_beyn,inlfeast_beyn
     include("feast_nonlinear.jl")
 end

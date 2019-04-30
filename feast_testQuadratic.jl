@@ -1,8 +1,11 @@
-srand(843)
+using LinearAlgebra
+using Random
 
-include("util.jl")
-include("feast_core.jl")
-include("feast_nonlinear.jl")
+Random.seed!(843)
+
+include("feast.jl")
+using ..feastNonlinear,..feastUtil
+using IterativeSolvers
 
 using IterativeSolvers
 
@@ -29,7 +32,7 @@ B1=X1*L1*X1'
 B2=X2*L2*X2'
 
 #quadratic eigenvcalue problem matrices: T(z)=z^2*M+z*D+K
-M=eye(n,n)
+M=Matrix(I,n,n)
 D=-B1-B2
 K=B1*B2
 
@@ -54,7 +57,7 @@ println("Using Beyn")
 Tf(z)=(z^2*M+z*D+K)
 (lest,xest)=beyn(Tf,x0,nc,emid,ra,rb)
 ncmax=100
-res=M*xest*diagm(lest.^2)+D*xest*diagm(lest)+K*xest
+res=M*xest*diagm(0 => lest.^2)+D*xest*diagm(0 => lest)+K*xest
 maxres=getMaxResInside(lest,xest,res,emid,ra,rb)
 println("res=$maxres")
 

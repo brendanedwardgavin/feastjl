@@ -222,13 +222,13 @@ end
 function Quadrrsolve(Q,M,D,K,emid,ra,rb)
         (n,m0)=size(Q)
         #rayleigh ritz
-        Mq=full(Q'*(M*Q))
-        Dq=full(Q'*(D*Q))
-        Kq=full(Q'*(K*Q))
+        Mq=Matrix(Q'*(M*Q))
+        Dq=Matrix(Q'*(D*Q))
+        Kq=Matrix(Q'*(K*Q))
 
         #solve projected problem
         (Aq,Bq) = linquad(Mq,Dq,Kq)
-        lest,xest=eigen(full(Aq),full(Bq))
+        lest,xest=eigen(Matrix(Aq),Matrix(Bq))
 
         #get eigenvectors from linearization
         xall=Q*(xest[m0+1:2*m0,:])
@@ -278,8 +278,8 @@ function beyn(Tf,V::Array{ComplexF64,2},nc,emid,ra,rb; verbose=false)
     (gk,wk)=trapezoidal(nc) #contour integral quadrature rule
     offset=pi/nc #offset angle of first quadrature point; makes sure it isn't on real axis for hermitian problems
 
-    A0=zeros(V)
-    A1=zeros(V)
+    A0=zero(V)
+    A1=zero(V)
     for k in 1:nc
 	#for k in 1:nc
 	    if(verbose)
@@ -291,11 +291,7 @@ function beyn(Tf,V::Array{ComplexF64,2},nc,emid,ra,rb; verbose=false)
         Qk=zeros(ComplexF64,n,m0)
         Tfz=Tf(z)
 
-        if(typeof(Tfz)==SparseMatrixCSC{Complex{Float64},Int64})
-            Qk=\(Tfz,V)
-        else
-            Qk=\(Tfz,V)
-        end
+        Qk=\(Tfz,V)
 
 	    A0=A0+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*Qk
 	    A1=A1+wk[k]*(((ra+rb)/2)*exp(im*theta)-((ra-rb)/2)*exp(-1.0*im*theta))*z*Qk
@@ -303,7 +299,7 @@ function beyn(Tf,V::Array{ComplexF64,2},nc,emid,ra,rb; verbose=false)
 
     (v0,s0,w0) = svd(A0)
 
-    Av=v0'*A1*w0*diagm(1 ./ s0)
+    Av=v0'*A1*w0*diagm(0 => 1 ./ s0)
 
     l,xv=eigen(Av)
 

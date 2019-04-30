@@ -32,7 +32,7 @@ function nlfeast_beyn(Tf,x0,nc,emid,ra,rb,eps,maxit;log=false)
     #Block method for applying residual
     function blockTf(l,x)
         (n,m0)=size(x)
-        out=zeros(x)
+        out=zero(x)
         for i in 1:m0
             out[:,i]=Tf(l[i])*x[:,i]
         end
@@ -65,8 +65,8 @@ function inlfeast_beyn(Tf,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=false)
                 #(int[:,i],history)=minres(M,resvecs[:,i],tol=alpha,initially_zero=true,maxiter=isMaxit,log=true)
                 nlinits=size(history[:resnorm],1)
                 data[:linIts][i,nc,data[:iterations]]=nlinits
-                #data[:linResiduals][i,nc,data[:iterations]]=history[:resnorm][nlinits]
-                data[:linResiduals][i,nc,data[:iterations]]=norm(resvecs[:,i]-M*int[:,i])/norm(resvecs[:,i])
+                data[:linResiduals][i,nc,data[:iterations]]=history[:resnorm][nlinits]
+                #data[:linResiduals][i,nc,data[:iterations]]=norm(resvecs[:,i]-M*int[:,i])/norm(resvecs[:,i])
 
                 if(nlinits>maxits)
                     maxits=nlinits
@@ -92,7 +92,7 @@ function inlfeast_beyn(Tf,x0,alpha,isMaxit,nc,emid,ra,rb,eps,maxit;log=false)
     #Block method for applying residual
     function blockTf(l,x)
         (n,m0)=size(x)
-        out=zeros(x)
+        out=zero(x)
         for i in 1:m0
             out[:,i]=Tf(l[i])*x[:,i]
         end
@@ -117,14 +117,14 @@ function nlfeast_quad(M,D,K,x0,nc,emid,ra,rb,eps,maxit;log=false)
     function integrand(z,x,lest,data,resvecs)
             (n,m0)=size(x)
 
-            Txl=M*x*diagm(lest.^2)+D*x*diagm(lest)+K*x
+            Txl=M*x*diagm(0 => lest.^2)+D*x*diagm(0 => lest)+K*x
             #Txl=M*x2+D*x1+K*x
             #Txl=resvecs
             Tz=z^2*M+z*D+K
 
             TinvTxl=\(Tz,Txl)
 
-            gamma=diagm(1 ./(z.-lest))
+            gamma=diagm(0 => 1 ./(z.-lest))
             Qk=x*gamma-TinvTxl*gamma
             return Qk
     end
@@ -134,7 +134,7 @@ function nlfeast_quad(M,D,K,x0,nc,emid,ra,rb,eps,maxit;log=false)
     #select the m0 solutions that are closest to the center of the contour
     rrsolve(Q)=Quadrrsolve(Q,M,D,K,emid,ra,rb)
 
-    Tf(l,x)=M*x*diagm(l.^2)+D*x*diagm(l)+K*x
+    Tf(l,x)=M*x*diagm(0 => l.^2)+D*x*diagm(0 => l)+K*x
 
     return feast_core(Tf,integrand,rrsolve,x0,nc,emid,ra,rb,eps,maxit,log=log)
 end
